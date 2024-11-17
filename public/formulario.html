@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria - Novo Pedido</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js_forms.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Novo Pedido</h1>
+    </header>
+
+    <main>
+        <form id="orderForm" class="form-container">
+            <div>
+                <label for="clientId">ID do Cliente:</label>
+                <input type="text" id="clientId" name="clientId" required>
+            </div>
+            <div>
+                <label for="clientName">Nome do Cliente:</label>
+                <input type="text" id="clientName" name="clientName" required>
+            </div>
+            <div>
+                <label for="distance">Distância (km):</label>
+                <input type="number" step="0.01" id="distance" name="distance" required>
+            </div>
+            <div>
+                <label for="deliveryType">Tipo de Entrega:</label>
+                <select id="deliveryType" name="deliveryType" required>
+                    <option value="Entrega Rápida">Entrega Rápida</option>
+                    <option value="Padrão de entrega">Padrão de entrega</option>
+                </select>
+            </div>
+            <div>
+                <label for="paymentType">Tipo de Pagamento:</label>
+                <select id="paymentType" name="paymentType" required>
+                    <option value="Cartão Crédito">Cartão Crédito</option>
+                    <option value="Cartão Débito">Cartão Débito</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                </select>
+            </div>
+            <div>
+                <label for="orderItems">Pedido:</label>
+                <textarea id="orderItems" name="orderItems" required></textarea>
+            </div>
+            <div>
+                <label for="totalValue">Valor Total (R$):</label>
+                <input type="number" step="0.01" id="totalValue" name="totalValue" required>
+            </div>
+            <div>
+                <label for="itemQuantity">Quantidade de Itens:</label>
+                <input type="number" id="itemQuantity" name="itemQuantity" required>
+            </div>
+            <div>
+                <label for="hasPizza">Tem Pizza:</label>
+                <select id="hasPizza" name="hasPizza" required>
+                    <option value="1">Sim</option>
+                    <option value="0">Não</option>
+                </select>
+            </div>
+            <div>
+                <label for="hasDrink">Tem Bebida:</label>
+                <select id="hasDrink" name="hasDrink" required>
+                    <option value="1">Sim</option>
+                    <option value="0">Não</option>
+                </select>
+            </div>
+            <button type="submit">Adicionar Pedido</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Pizzaria</p>
+    </footer>
+</body>
+</html>
