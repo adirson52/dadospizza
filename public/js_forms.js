@@ -2,38 +2,63 @@ document.getElementById("orderForm").addEventListener("submit", async function (
     event.preventDefault();
 
     const formData = new FormData(event.target);
-    const newOrder = {
-        idCliente: formData.get("clientId"),
-        nomeCliente: formData.get("clientName"),
-        distancia: parseFloat(formData.get("distance").replace(",", ".")),
-        tipoEntrega: formData.get("deliveryType"),
-        tipoPagamento: formData.get("paymentType"),
-        dataHora: new Date().toISOString().replace("T", " ").split(".")[0],
-        pedido: formData.get("orderItems"),
-        valorTotal: parseFloat(formData.get("totalValue").replace(",", ".")),
-        quantidadeItens: parseInt(formData.get("itemQuantity")),
-        temPizza: formData.get("hasPizza"),
-        temBebida: formData.get("hasDrink")
-    };
+
+    // Cria a nova linha do pedido
+    const newRow = [
+        formData.get("clientId"),
+        formData.get("clientName"),
+        parseFloat(formData.get("distance").replace(",", ".")),
+        formData.get("deliveryType"),
+        formData.get("paymentType"),
+        new Date().toISOString().replace("T", " ").split(".")[0], // Data e Hora do Pedido
+        formData.get("orderItems"),
+        parseFloat(formData.get("totalValue").replace(",", ".")),
+        formData.get("itemQuantity"),
+        formData.get("hasPizza"),
+        formData.get("hasDrink")
+    ].join(",") + "\n";
+
+    // Token e detalhes do repositório
+    const GITHUB_TOKEN = "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";
+    const REPO_OWNER = "adirson52";
+    const REPO_NAME = "dadospizza";
+    const FILE_PATH = "Tabela_de_Pedidos_de_Clientes.csv";
 
     try {
-        const response = await fetch('/api/add-line', {
-            method: 'POST',
+        // Buscar o conteúdo atual do arquivo CSV
+        const fileResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newOrder)
+                Authorization: `Bearer ${GITHUB_TOKEN}`
+            }
         });
 
-        const result = await response.json();
-        if (response.ok) {
-            alert(result.message);
-            event.target.reset();
-        } else {
-            alert(`Erro: ${result.error}`);
-        }
+        if (!fileResponse.ok) throw new Error(`Erro ao buscar o arquivo: ${fileResponse.statusText}`);
+        const fileData = await fileResponse.json();
+
+        // Decodificar o conteúdo do arquivo em Base64
+        const currentContent = atob(fileData.content);
+        const updatedContent = currentContent + newRow;
+
+        // Atualizar o arquivo no GitHub
+        const updateResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${GITHUB_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: "Adicionando novo pedido ao CSV",
+                content: btoa(updatedContent), // Codifica o conteúdo atualizado em Base64
+                sha: fileData.sha // SHA do arquivo atual
+            })
+        });
+
+        if (!updateResponse.ok) throw new Error(`Erro ao atualizar o arquivo: ${updateResponse.statusText}`);
+
+        alert("Pedido adicionado com sucesso!");
+        event.target.reset();
     } catch (error) {
-        console.error('Erro ao adicionar o pedido:', error);
-        alert('Erro ao adicionar o pedido.');
+        console.error("Erro ao adicionar o pedido:", error);
+        alert("Erro ao adicionar o pedido.");
     }
 });
