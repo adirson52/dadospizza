@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria - Sistema de Gestão</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Incluindo a biblioteca Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Pizzaria</h1>
+        <nav>
+            <ul>
+                <li><a href="#" id="homeTab">Cardápio</a></li>
+                <li><a href="#" id="ordersTab">Pedidos</a></li>
+                <li><a href="#" id="statsTab">Estatísticas</a></li>
+                <li><a href="#" id="segmentationTab">Segmentação</a></li>
+                <li><a href="#" id="inactiveTab">Clientes Inativos</a></li>
+                <li><a href="formulario.html" id="formTab">Novo Pedido</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Cardápio -->
+        <section id="homeSection" class="visible">
+            <h2>Cardápio</h2>
+            <table id="menuTable">
+                <thead>
+                    <tr>
+                        <th>Sabor</th>
+                        <th>Preço (R$)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Pedidos -->
+        <section id="ordersSection">
+            <h2>Pedidos de Clientes</h2>
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>ID Cliente</th>
+                        <th>Nome Cliente</th>
+                        <th>Distância (km)</th>
+                        <th>Tipo Entrega</th>
+                        <th>Tipo Pagamento</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Pedido</th>
+                        <th>Valor Total (R$)</th>
+                        <th>Quantidade de Itens</th>
+                        <th>Tem Pizza</th>
+                        <th>Tem Bebida</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- Estatísticas -->
+        <section id="statsSection">
+            <h2>Estatísticas dos Pedidos</h2>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <h3>Estatísticas Gerais</h3>
+                    <ul id="generalStats"></ul>
+                </div>
+                <div class="stat-item">
+                    <h3>Produtos Mais Vendidos</h3>
+                    <canvas id="productChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Horários de Pico</h3>
+                    <canvas id="hourChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Distribuição por Distância</h3>
+                    <canvas id="distanceChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Formas de Pagamento</h3>
+                    <canvas id="paymentChart"></canvas>
+                </div>
+                <!-- Novas Estatísticas -->
+                <div class="stat-item">
+                    <h3>Pedidos por Dia da Semana</h3>
+                    <canvas id="weekdayChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Métodos de Entrega Preferidos</h3>
+                    <canvas id="deliveryChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Itens por Pedido</h3>
+                    <canvas id="itemsChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Receita por Cliente</h3>
+                    <canvas id="revenueCustomerChart"></canvas>
+                </div>
+                <div class="stat-item">
+                    <h3>Percentual de Pedidos com Pizza</h3>
+                    <canvas id="pizzaChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Segmentação -->
+        <section id="segmentationSection">
+            <h2>Análise de Segmentação</h2>
+            <div class="segmentation-container">
+                <div class="segment-item">
+                    <h3>Resumo RFM</h3>
+                    <table id="rfmSummaryTable">
+                        <thead>
+                            <tr>
+                                <th>Segmento</th>
+                                <th>Contagem</th>
+                                <th>% do Total</th>
+                                <th>Recência Média (dias)</th>
+                                <th>Frequência Média</th>
+                                <th>Monetário Médio (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="segment-item">
+                    <h3>Dispersão Recência x Frequência</h3>
+                    <canvas id="rfChart"></canvas>
+                </div>
+                <div class="segment-item">
+                    <h3>Dispersão Frequência x Monetário</h3>
+                    <canvas id="fmChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clientes Inativos -->
+        <section id="inactiveSection">
+            <h2>Clientes Inativos</h2>
+            <table id="inactiveCustomersTable">
+                <thead>
+                    <tr>
+                        <th>ID Cliente</th>
+                        <th>Nome Cliente</th>
+                        <th>Recência (dias)</th>
+                        <th>Frequência</th>
+                        <th>Valor Monetário (R$)</th>
+                        <th>Ação Recomendada</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Pizzaria</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
