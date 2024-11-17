@@ -33,7 +33,7 @@ document.getElementById("orderForm").addEventListener("submit", async function (
             alert(`Erro: ${result.error}`);
         }
     } catch (error) {
-        console.error('Erro ao adicionar a linha:', error);
-        alert('Erro ao adicionar a linha.');
+        console.error('Erro ao adicionar o pedido:', error);
+        alert('Erro ao adicionar o pedido.');
     }
 });
