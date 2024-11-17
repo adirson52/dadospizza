@@ -1,40 +1,39 @@
-document.getElementById("orderForm").addEventListener("submit", function (event) {
+document.getElementById("orderForm").addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    // Capturar os dados do formulário
     const formData = new FormData(event.target);
     const newOrder = {
         idCliente: formData.get("clientId"),
         nomeCliente: formData.get("clientName"),
-        distancia: parseFloat(formData.get("distance")),
+        distancia: parseFloat(formData.get("distance").replace(",", ".")),
         tipoEntrega: formData.get("deliveryType"),
         tipoPagamento: formData.get("paymentType"),
         dataHora: new Date().toISOString().replace("T", " ").split(".")[0],
         pedido: formData.get("orderItems"),
-        valorTotal: parseFloat(formData.get("totalValue")),
+        valorTotal: parseFloat(formData.get("totalValue").replace(",", ".")),
         quantidadeItens: parseInt(formData.get("itemQuantity")),
-        temPizza: formData.get("hasPizza") === "1" ? "Sim" : "Não",
-        temBebida: formData.get("hasDrink") === "1" ? "Sim" : "Não"
+        temPizza: formData.get("hasPizza"),
+        temBebida: formData.get("hasDrink")
     };
 
-    // Adicionar a nova linha à tabela
-    addOrderToCSV(newOrder);
-    alert("Pedido adicionado com sucesso!");
-    event.target.reset();
+    try {
+        const response = await fetch('/api/add-line', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newOrder)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(result.message);
+            event.target.reset();
+        } else {
+            alert(`Erro: ${result.error}`);
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar a linha:', error);
+        alert('Erro ao adicionar a linha.');
+    }
 });
-
-function addOrderToCSV(order) {
-    const table = document.getElementById("ordersTable");
-    if (!table) return; // Apenas continua se a tabela estiver carregada
-
-    const row = document.createElement("tr");
-    Object.values(order).forEach(value => {
-        const td = document.createElement("td");
-        td.textContent = value;
-        row.appendChild(td);
-    });
-    table.querySelector("tbody").appendChild(row);
-
-    // Aqui, pode-se implementar o código para salvar no servidor via API ou backend
-    console.log("Pedido adicionado:", order);
-}
