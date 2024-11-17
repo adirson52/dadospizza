@@ -1,111 +1,94 @@
-const menuFile = "Pizzaria_Teste_Cardapio.csv";
-const ordersFile = "Tabela_de_Pedidos_de_Clientes.csv";
+// Função para limpar caracteres problemáticos
+function cleanText(text) {
+    return text
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢/g, 'â')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡/g, 'á')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£/g, 'ã')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©/g, 'é')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§/g, 'ç')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âº/g, 'ú')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âª/g, 'ê')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³/g, 'ó')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¨/g, 'è')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµ/g, 'õ')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±/g, 'ñ')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­/g, 'í')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³/g, 'ó')
+        .replace(/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­/g, 'í');
+}
 
-let ordersData = [];
-let clientes = {};
+// Função para validar os dados de uma linha
+function validateOrder(order) {
+    // Verifica se a linha tem o número correto de colunas
+    if (order.length !== 11) return false;
 
-const switchTab = (sectionId) => {
-    document.querySelectorAll("section").forEach(section => {
-        section.classList.remove("visible");
-    });
-    document.getElementById(sectionId).classList.add("visible");
-};
+    // Verifica se os campos numéricos são válidos
+    const distancia = parseFloat(order[2]);
+    const valorTotal = parseFloat(order[7]);
+    const quantidadeItens = parseInt(order[8]);
 
-const loadMenu = async () => {
-    try {
-        const response = await fetch(menuFile);
-        if (!response.ok) throw new Error("Erro ao carregar o cardápio.");
-        const csvText = await response.text();
-        const rows = csvText.split("\n").filter(row => row.trim() !== "");
-        const tableBody = document.getElementById("menuTable").querySelector("tbody");
-        tableBody.innerHTML = "";
+    if (isNaN(distancia) || isNaN(valorTotal) || isNaN(quantidadeItens)) return false;
 
-        rows.slice(1).forEach(row => {
-            const cols = row.split(";");
-            if (cols.length < 2) return;
-            const tr = document.createElement("tr");
-            cols.forEach(col => {
-                const td = document.createElement("td");
-                td.textContent = col.trim();
-                tr.appendChild(td);
-            });
-            tableBody.appendChild(tr);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar o cardápio:", error);
+    return true;
+}
+
+// Função para carregar e processar os dados do CSV
+async function loadOrders() {
+    const rawData = await fetch("Tabela_de_Pedidos_de_Clientes.csv").then(res => res.text());
+    const cleanData = cleanText(rawData);
+    const rows = cleanData.split("\n");
+
+    ordersData = rows.map(parseCSVLine).filter(validateOrder); // Limpa e valida os dados
+
+    console.log("Dados carregados e limpos:", ordersData); // Log para verificar os dados
+}
+
+// Função para analisar uma linha CSV
+function parseCSVLine(text) {
+    const regex = /(?:,|^)(?:"([^"]*(?:""[^"]*)*)"|([^",]*))/g; // Para vírgula como separador
+    let result = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        let matched = match[1] || match[2];
+        if (matched === undefined) matched = '';
+        matched = matched.replace(/""/g, '"');
+        result.push(matched.trim());
     }
-};
+    return result;
+}
 
-const cleanData = (line) => {
-    return line.replace(/[\uFFFD]/g, "").replace(/"/g, "").trim();
-};
-
-const loadOrders = async () => {
-    try {
-        const response = await fetch(ordersFile);
-        if (!response.ok) throw new Error("Erro ao carregar os pedidos.");
-        const csvText = await response.text();
-
-        const lines = csvText.split("\n").filter(line => line.trim() !== "");
-        const tableBody = document.getElementById("ordersTable").querySelector("tbody");
-        tableBody.innerHTML = "";
-        ordersData = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            const cols = cleanData(lines[i]).split(",");
-            if (cols.length < 11) continue;
-
-            try {
-                const dateTime = cols[5];
-                const date = dateTime.split(" ")[0];
-                const time = dateTime.split(" ")[1];
-
-                const order = {
-                    idCliente: cols[0],
-                    nomeCliente: cols[1],
-                    distancia: parseFloat(cols[2].replace(",", ".")) || 0,
-                    tipoEntrega: cols[3],
-                    tipoPagamento: cols[4],
-                    data: date,
-                    hora: time,
-                    pedido: cols[6].replace(/^"|"$/g, ""),
-                    valorTotal: parseFloat(cols[7].replace(",", ".")) || 0,
-                    quantidadeItens: parseInt(cols[8]) || 0,
-                    temPizza: cols[9].trim().toLowerCase() === "1" || cols[9].trim().toLowerCase() === "sim" ? "Sim" : "Não",
-                    temBebida: cols[10].trim().toLowerCase() === "1" || cols[10].trim().toLowerCase() === "sim" ? "Sim" : "Não"
-                };
-
-                ordersData.push(order);
-
-                const tr = document.createElement("tr");
-                [
-                    order.idCliente,
-                    order.nomeCliente,
-                    order.distancia.toFixed(2).replace(".", ","),
-                    order.tipoEntrega,
-                    order.tipoPagamento,
-                    order.data,
-                    order.hora,
-                    order.pedido,
-                    order.valorTotal.toFixed(2).replace(".", ","),
-                    order.quantidadeItens,
-                    order.temPizza,
-                    order.temBebida
-                ].forEach(col => {
-                    const td = document.createElement("td");
-                    td.textContent = col;
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
-            } catch (error) {
-                console.warn(`Erro ao processar a linha ${i}:`, error);
-            }
-        }
-    } catch (error) {
-        console.error("Erro ao carregar os pedidos:", error);
+// Carregar Estatísticas
+const loadStats = async () => {
+    if (ordersData.length === 0) {
+        await loadOrders();
     }
+
+    // Estatísticas Gerais
+    const totalVendas = ordersData.reduce((sum, order) => sum + parseFloat(order[7]), 0);
+    const totalPedidos = ordersData.length;
+    const valorMedio = totalVendas / totalPedidos || 0;
+    const distanciaMedia = ordersData.reduce((sum, order) => sum + parseFloat(order[2]), 0) / totalPedidos || 0;
+    const totalClientes = new Set(ordersData.map(order => order[0])).size;
+    const mediaItensPorPedido = ordersData.reduce((sum, order) => sum + parseInt(order[8]), 0) / totalPedidos || 0;
+    const pedidosComPizza = ordersData.filter(order => order[9] === "1").length;
+    const pedidosComBebida = ordersData.filter(order => order[10] === "1").length;
+    const percentualPizza = (pedidosComPizza / totalPedidos) * 100;
+    const percentualBebida = (pedidosComBebida / totalPedidos) * 100;
+
+    const generalStats = document.getElementById("generalStats");
+    generalStats.innerHTML = `
+        <li>Total de Vendas: R$ ${totalVendas.toFixed(2).replace(".", ",")}</li>
+        <li>Total de Pedidos: ${totalPedidos}</li>
+        <li>Total de Clientes Únicos: ${totalClientes}</li>
+        <li>Valor Médio dos Pedidos: R$ ${valorMedio.toFixed(2).replace(".", ",")}</li>
+        <li>Distância Média de Entrega: ${distanciaMedia.toFixed(2).replace(".", ",")} km</li>
+        <li>Média de Itens por Pedido: ${mediaItensPorPedido.toFixed(2).replace(".", ",")}</li>
+        <li>Pedidos com Pizza: ${percentualPizza.toFixed(1).replace(".", ",")}%</li>
+        <li>Pedidos com Bebida: ${percentualBebida.toFixed(1).replace(".", ",")}%</li>
+    `;
 };
 
+// Configuração de Navegação
 document.getElementById("homeTab").addEventListener("click", () => {
     switchTab("homeSection");
     loadMenu();
@@ -121,16 +104,7 @@ document.getElementById("statsTab").addEventListener("click", () => {
     loadStats();
 });
 
-document.getElementById("segmentationTab").addEventListener("click", () => {
-    switchTab("segmentationSection");
-    loadSegmentation();
-});
-
-document.getElementById("inactiveTab").addEventListener("click", () => {
-    switchTab("inactiveSection");
-    loadInactiveClients();
-});
-
+// Iniciar ao carregar a página
 document.addEventListener("DOMContentLoaded", () => {
     switchTab("homeSection");
     loadMenu();
