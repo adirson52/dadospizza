@@ -19,7 +19,7 @@ document.getElementById("orderForm").addEventListener("submit", async function (
     ].join(",") + "\n";
 
     // Token e detalhes do repositório
-    const GITHUB_TOKEN = "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";
+    const GITHUB_TOKEN = "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"; // Substituir pelo token real
     const REPO_OWNER = "adirson52";
     const REPO_NAME = "dadospizza";
     const FILE_PATH = "Tabela_de_Pedidos_de_Clientes.csv";
@@ -36,8 +36,11 @@ document.getElementById("orderForm").addEventListener("submit", async function (
         const fileData = await fileResponse.json();
 
         // Decodificar o conteúdo do arquivo em Base64
-        const currentContent = atob(fileData.content);
+        const currentContent = decodeURIComponent(escape(atob(fileData.content))); // Decodifica para UTF-8
         const updatedContent = currentContent + newRow;
+
+        // Re-encode em Base64 com UTF-8
+        const encodedContent = btoa(unescape(encodeURIComponent(updatedContent))); // Codifica para UTF-8
 
         // Atualizar o arquivo no GitHub
         const updateResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
@@ -48,7 +51,7 @@ document.getElementById("orderForm").addEventListener("submit", async function (
             },
             body: JSON.stringify({
                 message: "Adicionando novo pedido ao CSV",
-                content: btoa(updatedContent), // Codifica o conteúdo atualizado em Base64
+                content: encodedContent, // Codifica o conteúdo atualizado em Base64 com UTF-8
                 sha: fileData.sha // SHA do arquivo atual
             })
         });
